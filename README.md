@@ -1,2 +1,3 @@
-# weather-master
-A weather forecaster that predicts the weather
+# Weatherman
+
+A weather forecaster.

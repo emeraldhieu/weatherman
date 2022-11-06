@@ -1,0 +1,21 @@
+spring:
+  jackson:
+    default-property-inclusion: non_null
+
+feign:
+  client:
+    config:
+      forecast:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
+
+logging:
+  level:
+    # See https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/#feign-logging
+    com.emeraldhieu.app.forecast.ForecastClient: DEBUG
+
+application:
+  forecast:
+    # TODO Use Spring Cloud Config
+    apiKey: f598bbd03d2cd734a2c070aacf260467

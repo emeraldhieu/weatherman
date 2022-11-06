@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  redis:
+    image: redis:6.2.7
+    container_name: redis
+    hostname: redis
+    command: redis-server --requirepass password
+    ports:
+      - "6379:6379"
+    networks:
+      - weatherman-network
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+        reservations:
+          memory: 512m
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: password
+    ports:
+      - "8081:8081"
+    networks:
+      - weatherman-network
+    depends_on:
+      - redis
+networks:
+  weatherman-network:

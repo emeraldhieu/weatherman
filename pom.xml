@@ -18,6 +18,9 @@
         <java.version>11</java.version>
         <springCloudVersion>2021.0.4</springCloudVersion>
         <openFeignVersion>11.10</openFeignVersion>
+        <bucket4JSpringBootStarterVersion>0.7.0</bucket4JSpringBootStarterVersion>
+        <redissonVersion>3.17.7</redissonVersion>
+        <bucket4jVersion>2.1.0</bucket4jVersion>
     </properties>
 
     <dependencyManagement>
@@ -64,6 +67,34 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+
+        <!--
+            Rate-limit APIs using bucket4j.
+            See https://github.com/bucket4j/bucket4j
+        -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-redis</artifactId>
+            <version>8.1.1</version>
+        </dependency>
+
+        <!-- Redis implementation -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>${redissonVersion}</version>
+        </dependency>
+
+        <!--
+            Remove the warning "Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath..."
+            See https://github.com/netty/netty/issues/11020#issuecomment-781511365
+        -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns-native-macos</artifactId>
+            <version>4.1.84.Final</version>
+            <classifier>osx-x86_64</classifier>
         </dependency>
 
     </dependencies>

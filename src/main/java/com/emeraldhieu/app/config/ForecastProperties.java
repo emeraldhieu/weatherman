@@ -1,13 +1,15 @@
 package com.emeraldhieu.app.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Forecast's properties that are configured under "forecast" node in the "application.yml" file.
+ * Forecast's properties that are configured under "application.forecast" of "application.yml".
  */
 @ConfigurationProperties(prefix = "application.forecast")
-@Data
+@Getter
+@Setter
 public class ForecastProperties {
 
     private String apiKey;

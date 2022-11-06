@@ -19,3 +19,8 @@ application:
   forecast:
     # TODO Use Spring Cloud Config
     apiKey: f598bbd03d2cd734a2c070aacf260467
+  redis:
+    enabled: true
+    servers:
+      - redis://localhost:6379
+    password: password

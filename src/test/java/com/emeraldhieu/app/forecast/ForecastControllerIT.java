@@ -22,16 +22,26 @@ class ForecastControllerIT {
     private MockMvc mockMvc;
 
     @Test
-    void whenGetWeather_thenReturn200() throws Exception {
+    void whenGetCities_thenReturn200() throws Exception {
         // WHEN
         mockMvc.perform(get("/weather/summary")
                 .param("unit", Unit.CELSIUS.getKeyword())
                 .param("temperature", "42")
                 .param("cities", "2618425", "3621849", "3133880")
-                .header("Accept-language", "en"))
+            )
             .andExpect(status().isOk());
 
         // THEN
         verify(forecastService).getCities(Unit.CELSIUS, 42, List.of("2618425", "3621849", "3133880"));
+    }
+
+    @Test
+    void whenGetTemperatures_thenReturn200() throws Exception {
+        // WHEN
+        mockMvc.perform(get("/weather/cities/{cityId}", "2618425"))
+            .andExpect(status().isOk());
+
+        // THEN
+        verify(forecastService).getTemperatures("2618425");
     }
 }

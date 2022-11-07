@@ -24,3 +24,6 @@ application:
     servers:
       - redis://localhost:6379
     password: password
+  rate-limit:
+    requestCount: 2
+    durationInSeconds: 1

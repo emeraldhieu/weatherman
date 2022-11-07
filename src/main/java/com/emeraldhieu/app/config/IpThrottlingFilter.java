@@ -6,6 +6,8 @@ import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -22,39 +24,46 @@ import java.time.Duration;
  * Learnt from https://github.com/klebertiko/spring-boot-bucket4j-redis-demo/blob/master/src/main/java/com/abddennebi/demo/filter/IpThrottlingFilter.java.
  */
 @RequiredArgsConstructor
-public class IpThrottlingFilter
-    //implements Filter {
-    extends GenericFilterBean {
+public class IpThrottlingFilter extends GenericFilterBean {
 
+    private static final String RATE_LIMIT_NAMESPACE = "rateLimit:";
     private final ProxyManager proxyManager;
+    private final RateLimitProperties rateLimitProperties;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
-        BucketConfiguration bucketConfiguration = BucketConfiguration.builder()
-            .addLimit(Bandwidth.simple(2, Duration.ofMinutes(1)))
-            .build();
-
-        /**
-         * Init a bucket whose key is the IP address.
-         */
-        Bucket bucket = proxyManager.builder()
-            // TODO Improve the bucket someway
-            .build(httpRequest.getRemoteAddr(), bucketConfiguration);
+        Bucket bucket = getBucket(httpRequest.getRemoteAddr());
 
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
         if (probe.isConsumed()) {
-            // the limit is not exceeded
+            // The limit is not exceeded.
             httpResponse.setHeader("X-Rate-Limit-Remaining", "" + probe.getRemainingTokens());
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            // limit is exceeded
-            httpResponse.setContentType("text/plain");
-            httpResponse.setStatus(429);
-            httpResponse.getWriter().append("Too many requests");
+            // The limit is exceeded.
+            httpResponse.setContentType(MediaType.TEXT_PLAIN_VALUE);
+            httpResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+            httpResponse.getWriter().append(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase());
         }
+    }
+
+    private Bucket getBucket(String ipAddress) {
+        BucketConfiguration bucketConfiguration = BucketConfiguration.builder()
+            .addLimit(Bandwidth.simple(rateLimitProperties.getRequestCount(),
+                Duration.ofSeconds(rateLimitProperties.getDurationInSeconds())))
+            .build();
+
+        // Replace colon with underscore for Redis not to categorize by colon
+        String ipAddressToStore = ipAddress.replace(":", "_");
+        String rateLimitCacheKey = RATE_LIMIT_NAMESPACE + ipAddressToStore;
+
+        // Init a bucket whose key is the IP address.
+        Bucket bucket = proxyManager.builder()
+            .build(rateLimitCacheKey, bucketConfiguration);
+        return bucket;
     }
 }

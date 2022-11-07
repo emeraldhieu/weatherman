@@ -12,12 +12,14 @@ import org.springframework.core.Ordered;
 public class FilterConfiguration {
 
     private final ProxyManager<String> proxyManager;
+    private final RateLimitProperties rateLimitProperties;
 
     @Bean
     public FilterRegistrationBean<IpThrottlingFilter> ipThrottlingFilter() {
         FilterRegistrationBean<IpThrottlingFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new IpThrottlingFilter(proxyManager));
+        registrationBean.setFilter(new IpThrottlingFilter(proxyManager, rateLimitProperties));
         registrationBean.addUrlPatterns("/weather/summary");
+        registrationBean.addUrlPatterns("/weather/cities");
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registrationBean;
     }

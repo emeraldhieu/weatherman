@@ -59,7 +59,8 @@ public class RedisConfiguration {
 
     @Bean
     public KeyGenerator keyGenerator() {
-        return (target, method, params) -> method.getName() + "_" +
-            StringUtils.arrayToDelimitedString(params, "_");
+        return (target, method, params) ->
+            method.getName() + "_" +
+                StringUtils.arrayToDelimitedString(params, "_");
     }
 }

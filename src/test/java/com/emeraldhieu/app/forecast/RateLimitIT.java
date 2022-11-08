@@ -44,11 +44,18 @@ class RateLimitIT {
     @Test
     void givenRateLimitOneRequestPerTenSeconds_whenCallAnyEndpointForTheSecondTime_thenReturn429() throws Exception {
         // WHEN
-        mockMvc.perform(get("/weather/summary").param("unit", Unit.CELSIUS.getKeyword()).param("temperature", "42").param("cities", "2618425", "3621849", "3133880")).andExpect(status().isOk());
+        mockMvc.perform(get("/weather/summary")
+            .param("unit", Unit.CELSIUS.getKeyword())
+            .param("temperature", "42").param("cities", "2618425", "3621849", "3133880"))
+            .andExpect(status().isOk());
 
         // THEN
-        mockMvc.perform(get("/weather/summary").param("unit", Unit.CELSIUS.getKeyword()).param("temperature", "42").param("cities", "2618425", "3621849", "3133880")).andExpect(status().isTooManyRequests());
+        mockMvc.perform(get("/weather/summary")
+            .param("unit", Unit.CELSIUS.getKeyword())
+            .param("temperature", "42").param("cities", "2618425", "3621849", "3133880"))
+            .andExpect(status().isTooManyRequests());
 
-        mockMvc.perform(get("/weather/cities/{cityId}", "2618425")).andExpect(status().isTooManyRequests());
+        mockMvc.perform(get("/weather/cities/{cityId}", "2618425"))
+            .andExpect(status().isTooManyRequests());
     }
 }

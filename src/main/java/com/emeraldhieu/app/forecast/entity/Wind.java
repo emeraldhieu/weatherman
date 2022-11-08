@@ -5,10 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serializable;
+
 @Builder
 @Getter
 @Jacksonized
-public class Wind {
+public class Wind implements Serializable {
 
     private final double speed;
 

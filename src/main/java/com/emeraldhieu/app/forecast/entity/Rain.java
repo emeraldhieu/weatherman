@@ -5,10 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serializable;
+
 @Builder
 @Getter
 @Jacksonized
-public class Rain {
+public class Rain implements Serializable {
 
     @JsonAlias("3h")
     private final double lastThreeHourRainVolume;

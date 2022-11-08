@@ -5,12 +5,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Builder
 @Getter
 @Jacksonized
-public class ForecastDataItem {
+public class ForecastDataItem implements Serializable {
     private final String dt;
     private final Main main;
 

@@ -5,10 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serializable;
+
 @Builder
 @Getter
 @Jacksonized
-public class Coordinate {
+public class Coordinate implements Serializable {
 
     @JsonAlias("lat")
     public final String latitude;

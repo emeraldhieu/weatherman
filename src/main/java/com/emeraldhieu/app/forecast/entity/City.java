@@ -5,10 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serializable;
+
 @Builder
 @Getter
 @Jacksonized
-public class City {
+public class City implements Serializable {
 
     private final String id;
     private final String name;

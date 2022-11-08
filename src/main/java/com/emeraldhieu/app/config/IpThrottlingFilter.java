@@ -1,6 +1,5 @@
 package com.emeraldhieu.app.config;
 
-import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
@@ -17,7 +16,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.Duration;
 
 /**
  * A filter that rate-limits request based on IP address.
@@ -28,7 +26,7 @@ public class IpThrottlingFilter extends GenericFilterBean {
 
     private static final String RATE_LIMIT_NAMESPACE = "rateLimit:";
     private final ProxyManager proxyManager;
-    private final RateLimitProperties rateLimitProperties;
+    private final BucketConfiguration bucketConfiguration;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -52,11 +50,6 @@ public class IpThrottlingFilter extends GenericFilterBean {
     }
 
     private Bucket getBucket(String ipAddress) {
-        BucketConfiguration bucketConfiguration = BucketConfiguration.builder()
-            .addLimit(Bandwidth.simple(rateLimitProperties.getRequestCount(),
-                Duration.ofSeconds(rateLimitProperties.getDurationInSeconds())))
-            .build();
-
         // Replace colon with underscore for Redis not to categorize by colon
         String ipAddressToStore = ipAddress.replace(":", "_");
         String rateLimitCacheKey = RATE_LIMIT_NAMESPACE + ipAddressToStore;

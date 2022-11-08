@@ -37,7 +37,8 @@ public class RateLimitConfiguration {
         ConnectionManager connectionManager = ConfigSupport.createConnectionManager(config);
         CommandExecutor commandExecutor = new CommandSyncService(connectionManager, null);
         return RedissonBasedProxyManager.builderFor(commandExecutor)
-            .withExpirationStrategy(ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofSeconds(10)))
+            .withExpirationStrategy(
+                ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofSeconds(rateLimitProperties.getExpirationInSeconds())))
             .build();
     }
 }

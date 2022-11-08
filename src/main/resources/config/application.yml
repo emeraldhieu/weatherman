@@ -26,4 +26,5 @@ application:
     password: password
   rate-limit:
     requestCount: 2
-    durationInSeconds: 1
+    durationInSeconds: 30
+    expirationInSeconds: 60

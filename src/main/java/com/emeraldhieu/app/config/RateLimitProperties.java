@@ -13,4 +13,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class RateLimitProperties {
     private int requestCount;
     private int durationInSeconds;
+    private int expirationInSeconds;
 }

@@ -113,6 +113,14 @@
             <classifier>osx-x86_64</classifier>
         </dependency>
 
+        <!-- Embedded Redis for testing caching -->
+        <dependency>
+            <groupId>it.ozimov</groupId>
+            <artifactId>embedded-redis</artifactId>
+            <version>0.7.2</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

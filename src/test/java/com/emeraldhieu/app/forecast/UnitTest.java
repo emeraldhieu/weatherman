@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UnitTest {
+
     private ObjectMapper objectMapper;
 
     @BeforeEach

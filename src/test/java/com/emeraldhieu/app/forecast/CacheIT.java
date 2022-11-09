@@ -1,6 +1,7 @@
 package com.emeraldhieu.app.forecast;
 
 import com.emeraldhieu.app.config.RedisConfiguration;
+import com.emeraldhieu.app.forecast.cacheentity.DayForecast;
 import com.emeraldhieu.app.forecast.entity.City;
 import com.emeraldhieu.app.forecast.entity.Forecast;
 import com.emeraldhieu.app.forecast.entity.ForecastDataItem;
@@ -16,8 +17,10 @@ import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 import redis.embedded.RedisServer;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
@@ -44,7 +47,17 @@ class CacheIT {
     @Autowired
     private ForecastProcessor forecastProcessor;
 
+    @Autowired
+    private ForecastTimeFormatter forecastTimeFormatter;
+
     private static RedisServer redisServer;
+
+    private String cityId = "2618425";
+    private String name = "Copenhagen";
+    private LocalDate date = LocalDate.of(2022, 11, 6);
+    private String apiUnit = Unit.CELSIUS.getApiUnit();
+    private int maxCount = 40;
+    private List<Integer> hours = List.of(0, 3, 6, 9, 12, 15, 18, 21);
 
     @BeforeAll
     public static void setUpALl() {
@@ -58,73 +71,68 @@ class CacheIT {
     }
 
     @Test
-    void givenCachedForecast_whenGetForecast_thenReturnCachedForecast() {
+    void givenCachedDayForecast_whenGetDayForecast_thenReturnCachedDayForecast() {
         // GIVEN
-        LocalDateTime dateTime = LocalDateTime.parse("2022-11-05T18:00:42");
-        when(clock.getCurrentTime()).thenReturn(dateTime);
+        LocalDate dateTime = LocalDate.of(2022, 11, 5);
+        when(clock.getCurrentLocalDate()).thenReturn(dateTime);
 
-        String cityId = "2618425";
-        String apiUnit = Unit.CELSIUS.getApiUnit();
-        int count = forecastProcessor.getTimestampCount();
-        Forecast forecast = getForecast(cityId);
-        given(forecastClient.getForecast(cityId, apiUnit, count)).willReturn(forecast);
+        Forecast forecast = getForecast();
+        given(forecastClient.getForecast(cityId, apiUnit, maxCount)).willReturn(forecast);
 
-        Forecast forecastCacheMiss = forecastRepository.getForecast(cityId, apiUnit, count);
-        assertEquals(forecast, forecastCacheMiss);
+        DayForecast expectedDayForecast = getDayForecast();
+
+        DayForecast dayForecastCacheMiss = forecastRepository.getDayForecast(cityId);
+        assertEquals(expectedDayForecast, dayForecastCacheMiss);
 
         // WHEN
-        Forecast forecastCacheHit = forecastRepository.getForecast(cityId, apiUnit, count);
-        assertEquals(forecast, forecastCacheHit);
+        DayForecast dayForecastCacheHit = forecastRepository.getDayForecast(cityId);
+        assertEquals(expectedDayForecast, dayForecastCacheHit);
 
         // THEN
-        verify(forecastClient, times(1)).getForecast(cityId, apiUnit, count);
+        verify(forecastClient, times(1)).getForecast(cityId, apiUnit, maxCount);
 
         Cache cache = cacheManager.getCache(RedisConfiguration.CACHE_NAME);
-        String keyOutside = String.format("getForecast_%s_%s_%d", cityId, apiUnit, count);
-        Forecast cachedForecast = cache.get(keyOutside, Forecast.class);
-        assertEquals(forecast, cachedForecast);
+        String cacheKey = forecastRepository.getCacheKey(cityId, date);
+        DayForecast cachedDayForecast = cache.get(cacheKey, DayForecast.class);
+        assertEquals(expectedDayForecast, cachedDayForecast);
     }
 
-    private static Forecast getForecast(String cityId) {
-        Forecast forecast = Forecast.builder()
-            .forecastDataItems(List.of(
-                ForecastDataItem.builder()
+    private DayForecast getDayForecast() {
+        DayForecast expectedDayForecast = DayForecast.builder()
+            .id(cityId)
+            .name(name)
+            .averageTemperature(hours.stream().mapToDouble(Integer::doubleValue).average().getAsDouble())
+            .date(date)
+            .build();
+        return expectedDayForecast;
+    }
+
+    private Forecast getForecast() {
+
+        List<ForecastDataItem> forecastDataItems = hours.stream()
+            .map(hour -> {
+                LocalDateTime dateTime = LocalDateTime.of(2022, 11, 6, hour, 0, 0);
+                String dateTimeStr = forecastTimeFormatter.format(dateTime);
+                return ForecastDataItem.builder()
                     .main(Main.builder()
-                        .temp(42)
+                        .temp(hour)
                         .build())
-                    .forecastedTime("2022-11-06 06:00:00")
-                    .build()
-            ))
+                    .forecastedTime(dateTimeStr)
+                    .build();
+            })
+            .collect(Collectors.toList());
+        Forecast forecast = Forecast.builder()
+            .forecastDataItems(forecastDataItems)
             .city(City.builder()
                 .id(cityId)
+                .name(name)
                 .build())
             .build();
         return forecast;
     }
 
     @Test
-    void givenCachedForecast_whenGetForecastByCityId_thenReturnCachedForecast() {
-        // GIVEN
-        LocalDateTime dateTime = LocalDateTime.parse("2022-11-05T18:00:42");
-        when(clock.getCurrentTime()).thenReturn(dateTime);
-
-        String cityId = "2618425";
-        Forecast forecast = getForecast(cityId);
-        given(forecastClient.getForecast(cityId)).willReturn(forecast);
-
-        Forecast forecastCacheMiss = forecastRepository.getForecast(cityId);
-        assertEquals(forecast, forecastCacheMiss);
-
-        // WHEN
-        Forecast forecastCacheHit = forecastRepository.getForecast(cityId);
-        assertEquals(forecast, forecastCacheHit);
-
-        // THEN
-        verify(forecastClient, times(1)).getForecast(cityId);
-
-        Cache cache = cacheManager.getCache(RedisConfiguration.CACHE_NAME);
-        String keyOutside = String.format("getForecast_%s", cityId);
-        Forecast cachedForecast = cache.get(keyOutside, Forecast.class);
-        assertEquals(forecast, cachedForecast);
+    void givenCachedForecasts_whenGetNextDayForecastsByCityId_thenReturnCachedDayForecast() {
+        // TODO Do it later. I'm tired.
     }
 }

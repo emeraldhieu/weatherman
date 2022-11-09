@@ -2,6 +2,7 @@ package com.emeraldhieu.app.forecast;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,4 +23,31 @@ class ForecastTimeFormatterTest {
         // THEN
         assertEquals(expectedForecastedTime, forecastedTime);
     }
+
+    @Test
+    public void givenDateWithZeroPaddingDate_whenFormat_thenReturnDateStr() {
+        // GIVEN
+        LocalDate date = LocalDate.of(2022, 11, 5);
+        String expectedDateStr = "2022-11-05";
+
+        // WHEN
+        String dateStr = forecastTimeFormatter.format(date);
+
+        // THEN
+        assertEquals(expectedDateStr, dateStr);
+    }
+
+    @Test
+    public void givenDateWithoutZeroPaddingDate_whenFormat_thenReturnDateStr() {
+        // GIVEN
+        LocalDate date = LocalDate.of(2022, 11, 11);
+        String expectedDateStr = "2022-11-11";
+
+        // WHEN
+        String dateStr = forecastTimeFormatter.format(date);
+
+        // THEN
+        assertEquals(expectedDateStr, dateStr);
+    }
+
 }

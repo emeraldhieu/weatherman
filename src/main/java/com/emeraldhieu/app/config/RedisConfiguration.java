@@ -12,14 +12,14 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-@Profile("!test")
 @Configuration
 @ConditionalOnProperty(value = "application.redis.enabled", havingValue = "true")
 @RequiredArgsConstructor
@@ -28,13 +28,19 @@ public class RedisConfiguration {
 
     private final RedisProperties redisProperties;
     public static final String CACHE_NAME = "forecast";
+    private final Environment environment;
 
     @Bean
     public Config config() {
         Config config = new Config();
-        config.useSingleServer()
-            .setAddress(redisProperties.getServers()[0])
-            .setPassword(redisProperties.getPassword());
+        if (environment.acceptsProfiles(Profiles.of("test"))) {
+            config.useSingleServer()
+                .setAddress(redisProperties.getServers()[0]);
+        } else {
+            config.useSingleServer()
+                .setAddress(redisProperties.getServers()[0])
+                .setPassword(redisProperties.getPassword());
+        }
         return config;
     }
 

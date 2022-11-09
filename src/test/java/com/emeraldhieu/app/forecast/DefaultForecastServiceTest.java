@@ -15,17 +15,17 @@ import static org.mockito.Mockito.when;
 
 class DefaultForecastServiceTest {
 
-    private ForecastClient forecastClient;
-    private ForecastMapper forecastMapper;
     private ForecastProcessor forecastProcessor;
+    private ForecastRepository forecastRepository;
+    private ForecastMapper forecastMapper;
     private ForecastService forecastService;
 
     @BeforeEach
     public void setUp() {
-        forecastClient = mock(ForecastClient.class);
-        forecastMapper = mock(ForecastMapper.class);
         forecastProcessor = mock(ForecastProcessor.class);
-        forecastService = new DefaultForecastService(forecastClient, forecastMapper, forecastProcessor);
+        forecastRepository = mock(ForecastRepository.class);
+        forecastMapper = mock(ForecastMapper.class);
+        forecastService = new DefaultForecastService(forecastProcessor, forecastRepository, forecastMapper);
     }
 
     @Test
@@ -49,7 +49,7 @@ class DefaultForecastServiceTest {
                 .id(cityId)
                 .build())
             .build();
-        when(forecastClient.getForecast(cityId, unit.getApiUnit(), timestampCount)).thenReturn(forecast);
+        when(forecastRepository.getForecast(cityId, unit.getApiUnit(), timestampCount)).thenReturn(forecast);
 
         when(forecastProcessor.skipTodayTimestamps(forecast))
             .thenReturn(Forecast.builder()

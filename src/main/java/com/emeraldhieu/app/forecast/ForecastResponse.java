@@ -11,7 +11,9 @@ import java.time.LocalDate;
 @Getter
 @Jacksonized
 @EqualsAndHashCode
-public class TemperatureResponse {
-    private final LocalDate date;
+public class ForecastResponse {
+    private final String id;
+    private final String name;
     private final double averageTemperature;
+    private final LocalDate date;
 }

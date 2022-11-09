@@ -1,10 +1,16 @@
 package com.emeraldhieu.app.forecast;
 
-import com.emeraldhieu.app.config.RedisConfiguration;
+import com.emeraldhieu.app.forecast.cacheentity.DayForecast;
 import com.emeraldhieu.app.forecast.entity.Forecast;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A repository that wraps {@link ForecastClient} to support capabilities that require proxying such as caching.
@@ -13,19 +19,59 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @RequiredArgsConstructor
-public class ForecastRepository implements ForecastClient {
+@Slf4j
+public class ForecastRepository {
 
+    private final Clock clock;
+    private final Cache cache;
     private final ForecastClient forecastClient;
+    private final ForecastProcessor forecastProcessor;
+    private final ForecastTimeFormatter forecastTimeFormatter;
+    private static final String PREFIX = "forecast";
+    private static final String API_UNIT = Unit.CELSIUS.getApiUnit();
+    private static final int MAX_COUNT = 40;
 
-    @Override
-    @Cacheable(value = RedisConfiguration.CACHE_NAME, keyGenerator = "keyGenerator")
-    public Forecast getForecast(String cityId, String unit, int count) {
-        return forecastClient.getForecast(cityId, unit, count);
+    public DayForecast getDayForecast(String cityId) {
+        LocalDate today = clock.getCurrentLocalDate();
+        LocalDate tomorrow = today.plusDays(1);
+        String cacheKey = getCacheKey(cityId, tomorrow);
+        return getDayForecast(cityId, cacheKey);
     }
 
-    @Override
-    @Cacheable(value = RedisConfiguration.CACHE_NAME, keyGenerator = "keyGenerator")
-    public Forecast getForecast(String cityId) {
-        return forecastClient.getForecast(cityId);
+    String getCacheKey(String cityId, LocalDate localDate) {
+        String date = forecastTimeFormatter.format(localDate);
+        return String.format("%s_%s_%s", PREFIX, cityId, date);
+    }
+
+    private DayForecast getDayForecast(String cityId, String cacheKey) {
+        return cache.get(cacheKey, () -> {
+            Forecast forecast = forecastClient.getForecast(cityId, API_UNIT, MAX_COUNT);
+            List<DayForecast> dayForecasts = forecastProcessor.getDayForecasts(forecast);
+            putDayForecastCaches(cityId, dayForecasts);
+            return cache.get(cacheKey, DayForecast.class);
+        });
+    }
+
+    private void putDayForecastCaches(String cityId, List<DayForecast> dayForecasts) {
+        dayForecasts.forEach(dayForecast -> {
+            String cacheKey = String.format("%s_%s_%s", PREFIX, cityId, dayForecast.getDate());
+            if (cache.get(cacheKey) == null) {
+                log.info(String.format("%s has been cached", cacheKey));
+                cache.put(cacheKey, dayForecast);
+            }
+        });
+    }
+
+    List<DayForecast> getNextDayForecasts(String cityId) {
+        int dayOffset = 1;
+        int daysToRetrieve = 4;
+        LocalDate today = clock.getCurrentLocalDate();
+        return IntStream.rangeClosed(dayOffset, daysToRetrieve)
+            .mapToObj(theDayOffset -> {
+                LocalDate nextDay = today.plusDays(theDayOffset);
+                String nextDayCacheKey = getCacheKey(cityId, nextDay);
+                return getDayForecast(cityId, nextDayCacheKey);
+            })
+            .collect(Collectors.toList());
     }
 }

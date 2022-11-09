@@ -1,6 +1,5 @@
 package com.emeraldhieu.app.forecast;
 
-import com.emeraldhieu.app.forecast.entity.Forecast;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +15,18 @@ public class DefaultForecastService implements ForecastService {
     private final ForecastMapper forecastMapper;
 
     @Override
-    public List<CityResponse> getCities(Unit unit, double temperature, List<String> cityIds) {
-        int timestampCount = forecastProcessor.getTimestampCount();
+    public List<ForecastResponse> getCities(Unit unit, double temperature, List<String> cityIds) {
         return cityIds.stream()
-            .map(cityId -> forecastRepository.getForecast(cityId, unit.getApiUnit(), timestampCount))
-            .map(forecastProcessor::skipTodayTimestamps)
-            .map(forecastMapper::getCityResponse)
+            .map(cityId -> forecastRepository.getDayForecast(cityId))
+            .map(forecastMapper::getForecastResponse)
             .filter(forecastResponse -> forecastProcessor.isWarm(forecastResponse.getAverageTemperature(), temperature))
             .collect(Collectors.toList());
     }
 
     @Override
-    public List<TemperatureResponse> getTemperatures(String cityId) {
-        Forecast forecast = forecastRepository.getForecast(cityId);
-        return forecastMapper.getTemperatureResponses(forecast);
+    public List<ForecastResponse> getTemperatures(String cityId) {
+        return forecastRepository.getNextDayForecasts(cityId).stream()
+            .map(forecastMapper::getForecastResponse)
+            .collect(Collectors.toList());
     }
 }

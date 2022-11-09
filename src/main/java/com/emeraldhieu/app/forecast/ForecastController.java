@@ -23,8 +23,8 @@ public class ForecastController {
 
     @GetMapping("/summary")
     @ResponseStatus(HttpStatus.OK)
-    public List<CityResponse> getCities(@RequestParam Unit unit, @RequestParam Double temperature,
-                                        @RequestParam(value = "cities", defaultValue = "") List<String> cityIds) {
+    public List<ForecastResponse> getCities(@RequestParam Unit unit, @RequestParam Double temperature,
+                                            @RequestParam(value = "cities", defaultValue = "") List<String> cityIds) {
         return forecastService.getCities(unit, temperature, cityIds);
     }
 
@@ -43,7 +43,7 @@ public class ForecastController {
 
     @GetMapping("/cities/{cityId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<TemperatureResponse> getTemperatures(@PathVariable String cityId) {
+    public List<ForecastResponse> getTemperatures(@PathVariable String cityId) {
         return forecastService.getTemperatures(cityId);
     }
 }

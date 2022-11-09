@@ -16,7 +16,4 @@ public interface ForecastClient {
     @GetMapping(value = "/data/2.5/forecast")
     Forecast getForecast(@RequestParam("id") String cityId, @RequestParam("units") String unit,
                          @RequestParam("cnt") int count);
-
-    @GetMapping(value = "/data/2.5/forecast")
-    Forecast getForecast(@RequestParam("id") String cityId);
 }

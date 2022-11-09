@@ -17,7 +17,7 @@ public class DefaultForecastService implements ForecastService {
     @Override
     public List<ForecastResponse> getCities(Unit unit, double temperature, List<String> cityIds) {
         return cityIds.stream()
-            .map(cityId -> forecastRepository.getDayForecast(cityId))
+            .map(cityId -> forecastRepository.getDayForecast(cityId, unit))
             .map(forecastMapper::getForecastResponse)
             .filter(forecastResponse -> forecastProcessor.isWarm(forecastResponse.getAverageTemperature(), temperature))
             .collect(Collectors.toList());

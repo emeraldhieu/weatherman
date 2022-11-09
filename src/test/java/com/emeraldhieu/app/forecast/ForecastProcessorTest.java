@@ -244,7 +244,7 @@ class ForecastProcessorTest {
         LocalDate date = LocalDate.parse("2022-11-05");
 
         // WHEN
-        DayForecast dayForecast = forecastProcessor.getDayForecast(city, date, forecastDataItems);
+        DayForecast dayForecast = forecastProcessor.incorporateUnit(city, date, forecastDataItems);
 
         // THEN
         assertEquals(city.getId(), dayForecast.getId());

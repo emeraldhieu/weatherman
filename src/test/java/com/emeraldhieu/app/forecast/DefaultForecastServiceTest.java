@@ -19,6 +19,12 @@ class DefaultForecastServiceTest {
     private ForecastMapper forecastMapper;
     private ForecastService forecastService;
 
+    private String cityId = "2618425";
+    private String name = "Copenhagen";
+    private LocalDate date = LocalDate.of(2022, 11, 5);
+    private double averageTemperature = 42;
+    private Unit unit = Unit.CELSIUS;
+
     @BeforeEach
     public void setUp() {
         forecastProcessor = mock(ForecastProcessor.class);
@@ -33,11 +39,6 @@ class DefaultForecastServiceTest {
         int timestampCount = 9;
         when(forecastProcessor.getTimestampCount()).thenReturn(timestampCount);
 
-        String cityId = "2618425";
-        String name = "Copenhagen";
-        LocalDate date = LocalDate.of(2022, 11, 5);
-        double averageTemperature = 42;
-
         DayForecast dayForecast = DayForecast.builder()
             .id(cityId)
             .name(name)
@@ -45,7 +46,7 @@ class DefaultForecastServiceTest {
             .date(date)
             .build();
 
-        when(forecastRepository.getDayForecast(cityId)).thenReturn(dayForecast);
+        when(forecastRepository.getDayForecast(cityId, unit)).thenReturn(dayForecast);
 
         ForecastResponse expectedForecastResponse = ForecastResponse.builder()
             .id(cityId)
@@ -59,7 +60,7 @@ class DefaultForecastServiceTest {
         when(forecastProcessor.isWarm(averageTemperature, temperature)).thenReturn(true);
 
         // WHEN
-        List<ForecastResponse> forecastResponses = forecastService.getCities(Unit.CELSIUS, temperature, List.of(cityId));
+        List<ForecastResponse> forecastResponses = forecastService.getCities(unit, temperature, List.of(cityId));
 
         // THEN
         assertEquals(expectedForecastResponse, forecastResponses.get(0));

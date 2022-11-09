@@ -56,11 +56,11 @@ public class ForecastProcessor {
         LocalDate todayLocalDate = clock.getCurrentLocalDate();
         return forecastedDataItemsByDate.entrySet().stream()
             .filter(entry -> isValidDayForecast(todayLocalDate, entry.getKey(), entry.getValue()))
-            .map(entry -> getDayForecast(forecast.getCity(), entry.getKey(), entry.getValue()))
+            .map(entry -> incorporateUnit(forecast.getCity(), entry.getKey(), entry.getValue()))
             .collect(Collectors.toList());
     }
 
-    DayForecast getDayForecast(City city, LocalDate localDate, List<ForecastDataItem> forecastDataItems) {
+    DayForecast incorporateUnit(City city, LocalDate localDate, List<ForecastDataItem> forecastDataItems) {
         double averageTemperature = getAverageTemperature(forecastDataItems);
         return DayForecast.builder()
             .id(city.getId())
@@ -98,5 +98,19 @@ public class ForecastProcessor {
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         decimalFormat.setRoundingMode(RoundingMode.CEILING);
         return Double.parseDouble(decimalFormat.format(averageTemperature));
+    }
+
+    public DayForecast incorporateUnit(DayForecast dayForecast, Unit unit) {
+        if (unit == Unit.FAHRENHEIT) {
+            double fahrenheitTemperature = convertToFahrenheit(dayForecast.getAverageTemperature());
+            return dayForecast.toBuilder()
+                .averageTemperature(fahrenheitTemperature)
+                .build();
+        }
+        return dayForecast;
+    }
+
+    private double convertToFahrenheit(double temperature) {
+        return ((temperature * 9) / 5) + 32;
     }
 }

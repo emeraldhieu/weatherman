@@ -58,6 +58,7 @@ class CacheIT {
     private String apiUnit = Unit.CELSIUS.getApiUnit();
     private int maxCount = 40;
     private List<Integer> hours = List.of(0, 3, 6, 9, 12, 15, 18, 21);
+    private Unit unit = Unit.CELSIUS;
 
     @BeforeAll
     public static void setUpALl() {
@@ -81,11 +82,11 @@ class CacheIT {
 
         DayForecast expectedDayForecast = getDayForecast();
 
-        DayForecast dayForecastCacheMiss = forecastRepository.getDayForecast(cityId);
+        DayForecast dayForecastCacheMiss = forecastRepository.getDayForecast(cityId, unit);
         assertEquals(expectedDayForecast, dayForecastCacheMiss);
 
         // WHEN
-        DayForecast dayForecastCacheHit = forecastRepository.getDayForecast(cityId);
+        DayForecast dayForecastCacheHit = forecastRepository.getDayForecast(cityId, unit);
         assertEquals(expectedDayForecast, dayForecastCacheHit);
 
         // THEN

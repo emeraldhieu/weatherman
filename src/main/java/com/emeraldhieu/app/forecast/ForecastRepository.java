@@ -28,14 +28,15 @@ public class ForecastRepository {
     private final ForecastProcessor forecastProcessor;
     private final ForecastTimeFormatter forecastTimeFormatter;
     private static final String PREFIX = "forecast";
-    private static final String API_UNIT = Unit.CELSIUS.getApiUnit();
+    private static final Unit UNIT = Unit.CELSIUS;
+    private static final String API_UNIT = UNIT.getApiUnit();
     private static final int MAX_COUNT = 40;
 
-    public DayForecast getDayForecast(String cityId) {
+    public DayForecast getDayForecast(String cityId, Unit unit) {
         LocalDate today = clock.getCurrentLocalDate();
         LocalDate tomorrow = today.plusDays(1);
         String cacheKey = getCacheKey(cityId, tomorrow);
-        return getDayForecast(cityId, cacheKey);
+        return getDayForecast(cityId, cacheKey, unit);
     }
 
     String getCacheKey(String cityId, LocalDate localDate) {
@@ -43,16 +44,17 @@ public class ForecastRepository {
         return String.format("%s_%s_%s", PREFIX, cityId, date);
     }
 
-    private DayForecast getDayForecast(String cityId, String cacheKey) {
+    private DayForecast getDayForecast(String cityId, String cacheKey, Unit unit) {
         if (cache.get(cacheKey) == null) {
             Forecast forecast = forecastClient.getForecast(cityId, API_UNIT, MAX_COUNT);
             List<DayForecast> dayForecasts = forecastProcessor.getDayForecasts(forecast);
-            putDayForecastCaches(cityId, dayForecasts);
+            putCache(cityId, dayForecasts);
         }
-        return cache.get(cacheKey, DayForecast.class);
+        DayForecast cachedDayForecast = cache.get(cacheKey, DayForecast.class);
+        return forecastProcessor.incorporateUnit(cachedDayForecast, unit);
     }
 
-    private void putDayForecastCaches(String cityId, List<DayForecast> dayForecasts) {
+    private void putCache(String cityId, List<DayForecast> dayForecasts) {
         dayForecasts.forEach(dayForecast -> {
             String cacheKey = String.format("%s_%s_%s", PREFIX, cityId, dayForecast.getDate());
             if (cache.get(cacheKey) == null) {
@@ -70,7 +72,7 @@ public class ForecastRepository {
             .mapToObj(theDayOffset -> {
                 LocalDate nextDay = today.plusDays(theDayOffset);
                 String nextDayCacheKey = getCacheKey(cityId, nextDay);
-                return getDayForecast(cityId, nextDayCacheKey);
+                return getDayForecast(cityId, nextDayCacheKey, UNIT);
             })
             .collect(Collectors.toList());
     }

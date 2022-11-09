@@ -7,6 +7,7 @@ import org.redisson.config.Config;
 import org.redisson.spring.cache.CacheConfig;
 import org.redisson.spring.cache.RedissonSpringCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -53,6 +54,11 @@ public class RedisConfiguration {
     public CacheManager cacheManager(RedissonClient redissonClient) {
         Map<String, CacheConfig> config = getCacheConfigMap();
         return new RedissonSpringCacheManager(redissonClient, config);
+    }
+
+    @Bean
+    public Cache forecastCache(CacheManager cacheManager) {
+        return cacheManager.getCache(CACHE_NAME);
     }
 
     public Map<String, CacheConfig> getCacheConfigMap() {

@@ -2,6 +2,7 @@ package com.emeraldhieu.app.forecast;
 
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -12,7 +13,11 @@ import java.time.ZoneOffset;
 @Component
 public class Clock {
 
-    public LocalDateTime getCurrentTime() {
+    public LocalDateTime getCurrentLocalDateTime() {
         return LocalDateTime.now((ZoneOffset.UTC));
+    }
+
+    public LocalDate getCurrentLocalDate() {
+        return LocalDateTime.now((ZoneOffset.UTC)).toLocalDate();
     }
 }

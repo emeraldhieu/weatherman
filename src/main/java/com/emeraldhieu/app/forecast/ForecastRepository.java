@@ -44,12 +44,12 @@ public class ForecastRepository {
     }
 
     private DayForecast getDayForecast(String cityId, String cacheKey) {
-        return cache.get(cacheKey, () -> {
+        if (cache.get(cacheKey) == null) {
             Forecast forecast = forecastClient.getForecast(cityId, API_UNIT, MAX_COUNT);
             List<DayForecast> dayForecasts = forecastProcessor.getDayForecasts(forecast);
             putDayForecastCaches(cityId, dayForecasts);
-            return cache.get(cacheKey, DayForecast.class);
-        });
+        }
+        return cache.get(cacheKey, DayForecast.class);
     }
 
     private void putDayForecastCaches(String cityId, List<DayForecast> dayForecasts) {

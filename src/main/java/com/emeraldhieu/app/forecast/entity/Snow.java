@@ -6,13 +6,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
-import java.io.Serializable;
-
 @Builder
 @Getter
 @Jacksonized
 @EqualsAndHashCode
-public class Snow implements Serializable {
+public class Snow {
 
     @JsonAlias("3h")
     private final double lastThreeHourSnowVolume;

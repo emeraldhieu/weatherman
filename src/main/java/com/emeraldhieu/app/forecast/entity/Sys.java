@@ -6,13 +6,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
-import java.io.Serializable;
-
 @Builder
 @Getter
 @Jacksonized
 @EqualsAndHashCode
-public class Sys implements Serializable {
+public class Sys {
 
     @JsonAlias("pod")
     private final DayPart dayPart;

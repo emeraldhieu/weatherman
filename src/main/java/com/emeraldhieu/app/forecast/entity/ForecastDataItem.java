@@ -6,14 +6,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
-import java.io.Serializable;
 import java.util.List;
 
 @Builder
 @Getter
 @Jacksonized
 @EqualsAndHashCode
-public class ForecastDataItem implements Serializable {
+public class ForecastDataItem {
     private final String dt;
     private final Main main;
 

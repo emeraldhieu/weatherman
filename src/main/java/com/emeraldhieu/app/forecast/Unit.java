@@ -22,8 +22,6 @@ public enum Unit {
     private final String keyword;
     private final String name;
     private final String apiUnit;
-
-
     private static final Map<String, Unit> unitsByKeyword = new HashMap<>();
 
     static {

@@ -5,6 +5,8 @@ import com.emeraldhieu.app.forecast.entity.City;
 import com.emeraldhieu.app.forecast.entity.Forecast;
 import com.emeraldhieu.app.forecast.entity.ForecastDataItem;
 import com.emeraldhieu.app.forecast.entity.Main;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
+import redis.embedded.RedisServer;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +44,19 @@ class CacheIT {
     @Autowired
     private ForecastProcessor forecastProcessor;
 
+    private static RedisServer redisServer;
+
+    @BeforeAll
+    public static void setUpALl() {
+        redisServer = new RedisServer();
+        redisServer.start();
+    }
+
+    @AfterAll
+    public static void tearDownAll() {
+        redisServer.stop();
+    }
+
     @Test
     void givenCachedForecast_whenGetForecast_thenReturnCachedForecast() {
         // GIVEN
@@ -68,7 +84,6 @@ class CacheIT {
         Forecast cachedForecast = cache.get(keyOutside, Forecast.class);
         assertEquals(forecast, cachedForecast);
     }
-
 
     private static Forecast getForecast(String cityId) {
         Forecast forecast = Forecast.builder()

@@ -3,7 +3,9 @@ package com.emeraldhieu.app.forecast;
 import com.emeraldhieu.app.config.IpThrottlingFilter;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import redis.embedded.RedisServer;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,6 +32,19 @@ class RateLimitIT {
     private ForecastController forecastController;
 
     private MockMvc mockMvc;
+
+    private static RedisServer redisServer;
+
+    @BeforeAll
+    public static void setUpALl() {
+        redisServer = new RedisServer();
+        redisServer.start();
+    }
+
+    @AfterAll
+    public static void tearDownAll() {
+        redisServer.stop();
+    }
 
     @BeforeEach
     public void setUp() {

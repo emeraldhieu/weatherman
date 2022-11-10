@@ -1,4 +1,4 @@
-package com.emeraldhieu.app.config;
+package com.emeraldhieu.app.ratelimit.ip;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.BucketConfiguration;
@@ -20,25 +20,25 @@ import java.time.Duration;
 @Configuration
 @ConditionalOnProperty(value = "application.redis.enabled", havingValue = "true")
 @RequiredArgsConstructor
-public class RateLimitConfiguration {
+public class IpRateLimitConfiguration {
 
-    private final RateLimitProperties rateLimitProperties;
+    private final IpRateLimitProperties ipRateLimitProperties;
 
     @Bean
-    public BucketConfiguration bucketConfiguration() {
+    public BucketConfiguration ipBucketConfiguration() {
         return BucketConfiguration.builder()
-            .addLimit(Bandwidth.simple(rateLimitProperties.getRequestCount(),
-                Duration.ofSeconds(rateLimitProperties.getDurationInSeconds())))
+            .addLimit(Bandwidth.simple(ipRateLimitProperties.getRequestCount(),
+                Duration.ofSeconds(ipRateLimitProperties.getDurationInSeconds())))
             .build();
     }
 
     @Bean
-    public ProxyManager<String> proxyManager(Config config) {
+    public ProxyManager<String> ipProxyManager(Config config) {
         ConnectionManager connectionManager = ConfigSupport.createConnectionManager(config);
         CommandExecutor commandExecutor = new CommandSyncService(connectionManager, null);
         return RedissonBasedProxyManager.builderFor(commandExecutor)
             .withExpirationStrategy(
-                ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofSeconds(rateLimitProperties.getExpirationInSeconds())))
+                ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofSeconds(ipRateLimitProperties.getExpirationInSeconds())))
             .build();
     }
 }

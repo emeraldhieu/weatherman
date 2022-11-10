@@ -33,12 +33,13 @@ server:
 
 application:
   forecast:
+    # Configure API keys of multiple accounts here.
     apiKeys:
       - f598bbd03d2cd734a2c070aacf260467
       - f598bbd03d2cd734a2c070aacf260467
     retry:
-      maxAttempts: 3
-      maxDelay: 1000
+      maxAttempts: 2
+      maxDelay: 500
   redis:
     enabled: true
     servers:
@@ -47,7 +48,13 @@ application:
     timeToLiveInMinutes: 60
     maxIdleTimeInMinutes: 10
     cachePrefix: forecast
-  rate-limit:
+  api-rate-limit:
+    cacheKey: apiRateLimit
+    requestCount: 900000 # requests per month
+    durationInSeconds: 2630000 # 1 month
+    expirationInSeconds: 2630000
+  ip-rate-limit:
+    namespace: ipRateLimit
     requestCount: 2
-    durationInSeconds: 30
+    durationInSeconds: 1
     expirationInSeconds: 60

@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 class CacheIT {
 
     @MockBean
-    private ForecastClient forecastClient;
+    private RetryableForecastClient retryableForecastClient;
 
     @Autowired
     private ForecastRepository forecastRepository;
@@ -52,6 +52,7 @@ class CacheIT {
 
     private static RedisServer redisServer;
 
+    private String apiKey = "awesomeApiKey";
     private String cityId = "2618425";
     private String name = "Copenhagen";
     private LocalDate date = LocalDate.of(2022, 11, 6);
@@ -78,7 +79,7 @@ class CacheIT {
         when(clock.getCurrentLocalDate()).thenReturn(dateTime);
 
         Forecast forecast = getForecast();
-        given(forecastClient.getForecast(cityId, apiUnit, maxCount)).willReturn(forecast);
+        given(retryableForecastClient.getForecast(cityId)).willReturn(forecast);
 
         DayForecast expectedDayForecast = getDayForecast();
 
@@ -90,7 +91,7 @@ class CacheIT {
         assertEquals(expectedDayForecast, dayForecastCacheHit);
 
         // THEN
-        verify(forecastClient, times(1)).getForecast(cityId, apiUnit, maxCount);
+        verify(retryableForecastClient, times(1)).getForecast(cityId);
 
         Cache cache = cacheManager.getCache(RedisConfiguration.CACHE_NAME);
         String cacheKey = forecastRepository.getCacheKey(cityId, date);

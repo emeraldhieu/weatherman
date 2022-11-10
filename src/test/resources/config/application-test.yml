@@ -1,4 +1,4 @@
 application:
-  rate-limit:
+  ip-rate-limit:
     requestCount: 1
     durationInSeconds: 10

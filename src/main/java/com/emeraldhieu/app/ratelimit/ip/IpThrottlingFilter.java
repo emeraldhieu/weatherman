@@ -1,4 +1,4 @@
-package com.emeraldhieu.app.config;
+package com.emeraldhieu.app.ratelimit.ip;
 
 import com.emeraldhieu.app.forecast.exception.TooManyRequestException;
 import io.github.bucket4j.Bucket;
@@ -24,9 +24,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class IpThrottlingFilter extends GenericFilterBean {
 
-    private static final String RATE_LIMIT_NAMESPACE = "rateLimit:";
-    private final ProxyManager proxyManager;
-    private final BucketConfiguration bucketConfiguration;
+    private final ProxyManager ipProxyManager;
+    private final BucketConfiguration ipBucketConfiguration;
+    private final IpRateLimitProperties ipRateLimitProperties;
     private final HandlerExceptionResolver exceptionResolver;
 
     @Override
@@ -52,11 +52,10 @@ public class IpThrottlingFilter extends GenericFilterBean {
     private Bucket getBucket(String ipAddress) {
         // Replace colon with underscore for Redis not to categorize by colon
         String ipAddressToStore = ipAddress.replace(":", "_");
-        String rateLimitCacheKey = RATE_LIMIT_NAMESPACE + ipAddressToStore;
+        String rateLimitCacheKey = ipRateLimitProperties.getNamespace() + ":" + ipAddressToStore;
 
         // Init a bucket whose key is the IP address.
-        Bucket bucket = proxyManager.builder()
-            .build(rateLimitCacheKey, bucketConfiguration);
-        return bucket;
+        return ipProxyManager.builder()
+            .build(rateLimitCacheKey, ipBucketConfiguration);
     }
 }

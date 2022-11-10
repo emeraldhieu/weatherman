@@ -1,4 +1,4 @@
-package com.emeraldhieu.app.forecast;
+package com.emeraldhieu.app.ratelimit.api;
 
 import com.emeraldhieu.app.config.ForecastProperties;
 import lombok.RequiredArgsConstructor;
@@ -16,21 +16,20 @@ public class ApiKeyIndexRotator {
 
     private final ForecastProperties forecastProperties;
     private final Cache cache;
-    private final String API_KEY_INDEX = "apiKeyIndex";
 
     public int rotateIndex() {
         int apiKeyIndex = getNextApiKeyIndex();
         if (apiKeyIndex >= forecastProperties.getApiKeys().size()) {
             apiKeyIndex = 0; // Back to index 0.
         }
-        cache.put(API_KEY_INDEX, apiKeyIndex);
+        cache.put(forecastProperties.getApiKeyIndexCacheKey(), apiKeyIndex);
         return apiKeyIndex;
     }
 
     private int getNextApiKeyIndex() {
-        if (cache.get(API_KEY_INDEX) == null) {
+        if (cache.get(forecastProperties.getApiKeyIndexCacheKey()) == null) {
             return 0; // Default to 0 if not existed
         }
-        return cache.get(API_KEY_INDEX, Integer.class) + 1;
+        return cache.get(forecastProperties.getApiKeyIndexCacheKey(), Integer.class) + 1;
     }
 }

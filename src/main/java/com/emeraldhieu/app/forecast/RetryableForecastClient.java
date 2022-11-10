@@ -3,6 +3,7 @@ package com.emeraldhieu.app.forecast;
 import com.emeraldhieu.app.config.ForecastProperties;
 import com.emeraldhieu.app.forecast.entity.Forecast;
 import com.emeraldhieu.app.forecast.exception.TooManyRequestException;
+import com.emeraldhieu.app.ratelimit.api.ApiKeyIndexRotator;
 import com.emeraldhieu.app.ratelimit.api.ApiRateLimit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 /**
- * A wrapper of {@link ForecastClient} that supports rate-limiting retrying, and fallback.
+ * A wrapper of {@link ForecastClient} that supports retrying, rate limiting, and fallback.
  * If API quote is exceeded, the fallback will switch to the next API key.
  */
 @Component
@@ -28,7 +29,6 @@ public class RetryableForecastClient {
     private final ApiKeyIndexRotator apiKeyIndexRotator;
     private static final Unit UNIT = Unit.CELSIUS;
     private static final int MAX_COUNT = 40;
-    private final String API_KEY_INDEX = "apiKeyIndex";
     private final MessageSource messageSource;
 
     @Retryable(
@@ -38,7 +38,7 @@ public class RetryableForecastClient {
     )
     @ApiRateLimit
     public Forecast getForecast(String cityId) {
-        int apiKeyIndex = cache.get(API_KEY_INDEX, Integer.class);
+        int apiKeyIndex = cache.get(forecastProperties.getApiKeyIndexCacheKey(), Integer.class);
         return callForecastClient(cityId, apiKeyIndex);
     }
 

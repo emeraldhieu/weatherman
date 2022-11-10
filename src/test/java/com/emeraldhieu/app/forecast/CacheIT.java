@@ -1,6 +1,6 @@
 package com.emeraldhieu.app.forecast;
 
-import com.emeraldhieu.app.config.RedisConfiguration;
+import com.emeraldhieu.app.config.ForecastProperties;
 import com.emeraldhieu.app.forecast.cacheentity.DayForecast;
 import com.emeraldhieu.app.forecast.entity.City;
 import com.emeraldhieu.app.forecast.entity.Forecast;
@@ -50,6 +50,9 @@ class CacheIT {
     @Autowired
     private ForecastTimeFormatter forecastTimeFormatter;
 
+    @Autowired
+    private ForecastProperties forecastProperties;
+
     private static RedisServer redisServer;
 
     private String apiKey = "awesomeApiKey";
@@ -93,7 +96,7 @@ class CacheIT {
         // THEN
         verify(retryableForecastClient, times(1)).getForecast(cityId);
 
-        Cache cache = cacheManager.getCache(RedisConfiguration.CACHE_NAME);
+        Cache cache = cacheManager.getCache(forecastProperties.getCacheName());
         String cacheKey = forecastRepository.getCacheKey(cityId, date);
         DayForecast cachedDayForecast = cache.get(cacheKey, DayForecast.class);
         assertEquals(expectedDayForecast, cachedDayForecast);

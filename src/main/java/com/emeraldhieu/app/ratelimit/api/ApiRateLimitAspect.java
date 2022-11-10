@@ -1,10 +1,6 @@
 package com.emeraldhieu.app.ratelimit.api;
 
 import com.emeraldhieu.app.config.ForecastProperties;
-import com.emeraldhieu.app.forecast.ApiKeyIndexRotator;
-import com.emeraldhieu.app.forecast.ForecastClient;
-import com.emeraldhieu.app.forecast.Unit;
-import com.emeraldhieu.app.forecast.entity.Forecast;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
@@ -29,8 +25,8 @@ public class ApiRateLimitAspect {
     private final ProxyManager apiProxyManager;
     private final BucketConfiguration apiBucketConfiguration;
     private final ApiRateLimitProperties apiRateLimitProperties;
-    private final String API_KEY_INDEX = "apiKeyIndex";
     private final MessageSource messageSource;
+    private final ForecastProperties forecastProperties;
 
     @Around("@annotation(ApiRateLimit)")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -43,8 +39,8 @@ public class ApiRateLimitAspect {
          */
         if (probe.isConsumed()) { // Rate limit is not exceeded
 
-            if (cache.get(API_KEY_INDEX) == null) {
-                cache.put(API_KEY_INDEX, 0);
+            if (cache.get(forecastProperties.getApiKeyIndexCacheKey()) == null) {
+                cache.put(forecastProperties.getApiKeyIndexCacheKey(), 0);
             }
 
             return joinPoint.proceed();

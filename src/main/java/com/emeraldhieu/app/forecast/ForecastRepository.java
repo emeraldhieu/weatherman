@@ -1,5 +1,6 @@
 package com.emeraldhieu.app.forecast;
 
+import com.emeraldhieu.app.config.ForecastProperties;
 import com.emeraldhieu.app.forecast.cacheentity.DayForecast;
 import com.emeraldhieu.app.forecast.entity.Forecast;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class ForecastRepository {
     private final ForecastProcessor forecastProcessor;
     private final ForecastTimeFormatter forecastTimeFormatter;
     private final RetryableForecastClient retryableForecastClient;
-    private static final String PREFIX = "forecast";
+    private final ForecastProperties forecastProperties;
 
     public DayForecast getDayForecast(String cityId, Unit unit) {
         LocalDate today = clock.getCurrentLocalDate();
@@ -38,7 +39,8 @@ public class ForecastRepository {
 
     String getCacheKey(String cityId, LocalDate localDate) {
         String date = forecastTimeFormatter.format(localDate);
-        return String.format("%s_%s_%s", PREFIX, cityId, date);
+        return String.format("%s_%s_%s",
+            forecastProperties.getCacheKeyPrefix(), cityId, date);
     }
 
     private DayForecast getDayForecast(String cityId, String cacheKey, Unit unit) {
@@ -53,7 +55,8 @@ public class ForecastRepository {
 
     private void putCache(String cityId, List<DayForecast> dayForecasts) {
         dayForecasts.forEach(dayForecast -> {
-            String cacheKey = String.format("%s_%s_%s", PREFIX, cityId, dayForecast.getDate());
+            String cacheKey = String.format("%s_%s_%s",
+                forecastProperties.getCacheKeyPrefix(), cityId, dayForecast.getDate());
             if (cache.get(cacheKey) == null) {
                 log.info(String.format("%s has been cached", cacheKey));
                 cache.put(cacheKey, dayForecast);

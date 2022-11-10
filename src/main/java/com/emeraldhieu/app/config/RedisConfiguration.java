@@ -28,7 +28,7 @@ import java.util.Map;
 public class RedisConfiguration {
 
     private final RedisProperties redisProperties;
-    public static final String CACHE_NAME = "forecast";
+    private final ForecastProperties forecastProperties;
     private final Environment environment;
 
     @Bean
@@ -58,14 +58,14 @@ public class RedisConfiguration {
 
     @Bean
     public Cache forecastCache(CacheManager cacheManager) {
-        return cacheManager.getCache(CACHE_NAME);
+        return cacheManager.getCache(forecastProperties.getCacheName());
     }
 
     public Map<String, CacheConfig> getCacheConfigMap() {
         Map<String, CacheConfig> config = new HashMap<>();
-        long timeToLiveInMilliseconds = Duration.ofMinutes(redisProperties.getTimeToLiveInMinutes()).toMillis();
-        long maxIdleTimeInMilliseconds = Duration.ofMinutes(redisProperties.getMaxIdleTimeInMinutes()).toMillis();
-        config.put(CACHE_NAME, new CacheConfig(timeToLiveInMilliseconds, maxIdleTimeInMilliseconds));
+        long timeToLiveInMilliseconds = Duration.ofMinutes(forecastProperties.getTimeToLiveInMinutes()).toMillis();
+        long maxIdleTimeInMilliseconds = Duration.ofMinutes(forecastProperties.getMaxIdleTimeInMinutes()).toMillis();
+        config.put(forecastProperties.getCacheName(), new CacheConfig(timeToLiveInMilliseconds, maxIdleTimeInMilliseconds));
         return config;
     }
 

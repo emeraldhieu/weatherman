@@ -14,7 +14,4 @@ public class RedisProperties {
     private boolean enabled;
     private String[] servers;
     private String password;
-    private int timeToLiveInMinutes;
-    private int maxIdleTimeInMinutes;
-    private String cachePrefix;
 }

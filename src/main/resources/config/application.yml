@@ -40,21 +40,23 @@ application:
     retry:
       maxAttempts: 2
       maxDelay: 500
+    cacheName: forecast
+    cacheKeyPrefix: forecast
+    timeToLiveInMinutes: 60
+    maxIdleTimeInMinutes: 10
+    apiKeyIndexCacheKey: apiKeyIndex
   redis:
     enabled: true
     servers:
       - redis://localhost:6379
     password: password
-    timeToLiveInMinutes: 60
-    maxIdleTimeInMinutes: 10
-    cachePrefix: forecast
   api-rate-limit:
     cacheKey: apiRateLimit
-    requestCount: 900000 # requests per month
-    durationInSeconds: 2630000 # 1 month
-    expirationInSeconds: 2630000
+    requestCount: 2
+    durationInSeconds: 30
+    expirationInSeconds: 30
   ip-rate-limit:
     namespace: ipRateLimit
     requestCount: 2
-    durationInSeconds: 1
+    durationInSeconds: 10
     expirationInSeconds: 60

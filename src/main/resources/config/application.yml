@@ -33,7 +33,12 @@ server:
 
 application:
   forecast:
-    apiKey: f598bbd03d2cd734a2c070aacf260467
+    apiKeys:
+      - f598bbd03d2cd734a2c070aacf260467
+      - f598bbd03d2cd734a2c070aacf260467
+    retry:
+      maxAttempts: 3
+      maxDelay: 1000
   redis:
     enabled: true
     servers:

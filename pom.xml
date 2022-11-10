@@ -121,6 +121,15 @@
             <scope>test</scope>
         </dependency>
 
+        <!--
+            Spring Retry.
+            See https://github.com/spring-projects/spring-retry
+        -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

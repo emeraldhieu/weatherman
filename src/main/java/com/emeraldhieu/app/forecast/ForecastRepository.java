@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A repository that wraps {@link ForecastClient} to support capabilities that require proxying such as caching.
+ * A repository that wraps {@link RetryableForecastClient} to support caching.
  * If @Cacheable was applied on feign client, we wouldn't be able to mock feign's data and have the response cached.
  * See https://stackoverflow.com/questions/69282312/why-does-cachable-work-with-bean-return-mock-but-not-with-mockedbean#69284729
  */
@@ -24,13 +24,10 @@ public class ForecastRepository {
 
     private final Clock clock;
     private final Cache cache;
-    private final ForecastClient forecastClient;
     private final ForecastProcessor forecastProcessor;
     private final ForecastTimeFormatter forecastTimeFormatter;
+    private final RetryableForecastClient retryableForecastClient;
     private static final String PREFIX = "forecast";
-    private static final Unit UNIT = Unit.CELSIUS;
-    private static final String API_UNIT = UNIT.getApiUnit();
-    private static final int MAX_COUNT = 40;
 
     public DayForecast getDayForecast(String cityId, Unit unit) {
         LocalDate today = clock.getCurrentLocalDate();
@@ -46,7 +43,7 @@ public class ForecastRepository {
 
     private DayForecast getDayForecast(String cityId, String cacheKey, Unit unit) {
         if (cache.get(cacheKey) == null) {
-            Forecast forecast = forecastClient.getForecast(cityId, API_UNIT, MAX_COUNT);
+            Forecast forecast = retryableForecastClient.getForecast(cityId);
             List<DayForecast> dayForecasts = forecastProcessor.getDayForecasts(forecast);
             putCache(cityId, dayForecasts);
         }
@@ -72,7 +69,7 @@ public class ForecastRepository {
             .mapToObj(theDayOffset -> {
                 LocalDate nextDay = today.plusDays(theDayOffset);
                 String nextDayCacheKey = getCacheKey(cityId, nextDay);
-                return getDayForecast(cityId, nextDayCacheKey, UNIT);
+                return getDayForecast(cityId, nextDayCacheKey, Unit.CELSIUS);
             })
             .collect(Collectors.toList());
     }

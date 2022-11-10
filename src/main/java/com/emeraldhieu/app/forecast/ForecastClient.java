@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ForecastClient {
 
     @GetMapping(value = "/data/2.5/forecast")
-    Forecast getForecast(@RequestParam("id") String cityId, @RequestParam("units") String unit,
+    Forecast getForecast(@RequestParam("appid") String apiKey,
+                         @RequestParam("id") String cityId,
+                         @RequestParam("units") String unit,
                          @RequestParam("cnt") int count);
 }

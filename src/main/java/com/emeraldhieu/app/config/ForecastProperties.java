@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+
 /**
  * Forecast's properties that are configured under "application.forecast" of "application.yml".
  */
@@ -12,7 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class ForecastProperties {
 
-    private String apiKey;
+    private List<String> apiKeys;
     private String host;
     private String fiveDayForecastEndpoint;
 }

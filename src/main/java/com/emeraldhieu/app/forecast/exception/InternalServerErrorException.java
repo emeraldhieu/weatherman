@@ -9,10 +9,4 @@ public class InternalServerErrorException extends RuntimeException {
     public InternalServerErrorException(Throwable cause) {
         super(cause);
     }
-
-    @Override
-    public String toString() {
-        return "Internal server error: " + getMessage();
-    }
-
 }

@@ -9,10 +9,4 @@ public class NotFoundException extends RuntimeException {
     public NotFoundException(Throwable cause) {
         super(cause);
     }
-
-    @Override
-    public String toString() {
-        return "NotFoundException: " + getMessage();
-    }
-
 }

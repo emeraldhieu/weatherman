@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
  * "status": 400,
  * "error": "Bad Request",
  * "message": "Invalid JSON. Check your JSON.",
- * "path": "/doctor-api/doctors"
+ * "path": "/foo/bar"
  * }
  * 2) Hide implementation details by overriding "message".
  * 3) Log detailed error for developers to know what's going on.
@@ -84,13 +84,19 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(
         NoHandlerFoundException exception, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
+        // Log detailed message for developers to know what's going on.
         log.error(exception.getMessage());
+
+        String message = String.format("Resource %s not found", exception.getRequestURL());
 
         CustomError customError = CustomError.builder()
             .timestamp(LocalDateTime.now())
             .status(HttpStatus.NOT_FOUND.value())
             .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-            .message(messageSource.getMessage("resourceNotFound", null, null))
+
+            // Show a common error for clients. Avoid leaking internal details.
+            .message(message)
+
             .path(request.getContextPath() + request.getServletPath())
             .build();
 
@@ -107,7 +113,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             .timestamp(LocalDateTime.now())
             .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
             .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+
+            // Show a common error for clients. Avoid leaking internal details.
             .message(messageSource.getMessage("internalServerError", null, null))
+
             .path(request.getContextPath() + request.getServletPath())
             .build();
 
@@ -126,7 +135,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             .timestamp(LocalDateTime.now())
             .status(HttpStatus.BAD_REQUEST.value())
             .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+
+            // Show a common error for clients. Avoid leaking internal details.
             .message(message)
+
             .path(request.getContextPath() + request.getServletPath())
             .build();
 
@@ -155,19 +167,27 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
     protected ResponseEntity<Object> handleHttpMessageNotReadable(BadRequestException exception, HttpServletRequest request) {
-        log.error(exception.getMessage());
-
         CustomError customError = CustomError.builder()
             .timestamp(LocalDateTime.now())
             .status(HttpStatus.BAD_REQUEST.value())
             .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-
-            // Show a common error for clients. Avoid leaking internal details.
-            .message(exception.getMessage())
-
+            .message(exception.getMessage()) // This message comes from feign client
             .path(request.getContextPath() + request.getServletPath())
             .build();
 
         return new ResponseEntity<>(customError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(TooManyRequestException exception, HttpServletRequest request) {
+        CustomError customError = CustomError.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.TOO_MANY_REQUESTS.value())
+            .error(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase())
+            .message(exception.getMessage()) // This message comes from feign client
+            .path(request.getContextPath() + request.getServletPath())
+            .build();
+
+        return new ResponseEntity<>(customError, HttpStatus.TOO_MANY_REQUESTS);
     }
 }

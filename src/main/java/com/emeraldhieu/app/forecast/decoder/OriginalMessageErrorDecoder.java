@@ -3,6 +3,7 @@ package com.emeraldhieu.app.forecast.decoder;
 import com.emeraldhieu.app.forecast.exception.BadRequestException;
 import com.emeraldhieu.app.forecast.exception.InternalServerErrorException;
 import com.emeraldhieu.app.forecast.exception.NotFoundException;
+import com.emeraldhieu.app.forecast.exception.TooManyRequestException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import feign.Response;
@@ -43,7 +44,7 @@ public class OriginalMessageErrorDecoder implements ErrorDecoder {
                     ? message.getMessage()
                     : HttpStatus.NOT_FOUND.getReasonPhrase());
             } else if (response.status() == HttpStatus.TOO_MANY_REQUESTS.value()) {
-                return new NotFoundException(message.getMessage() != null
+                return new TooManyRequestException(message.getMessage() != null
                     ? message.getMessage()
                     : HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase());
             } else if (response.status() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {

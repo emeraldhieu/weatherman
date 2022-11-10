@@ -1,13 +1,13 @@
 package com.emeraldhieu.app.config;
 
+import com.emeraldhieu.app.forecast.exception.TooManyRequestException;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -27,6 +27,7 @@ public class IpThrottlingFilter extends GenericFilterBean {
     private static final String RATE_LIMIT_NAMESPACE = "rateLimit:";
     private final ProxyManager proxyManager;
     private final BucketConfiguration bucketConfiguration;
+    private final HandlerExceptionResolver exceptionResolver;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -43,9 +44,8 @@ public class IpThrottlingFilter extends GenericFilterBean {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             // The limit is exceeded.
-            httpResponse.setContentType(MediaType.TEXT_PLAIN_VALUE);
-            httpResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            httpResponse.getWriter().append(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase());
+            exceptionResolver.resolveException(httpRequest, httpResponse, null,
+                new TooManyRequestException("Rate limit has been reached"));
         }
     }
 

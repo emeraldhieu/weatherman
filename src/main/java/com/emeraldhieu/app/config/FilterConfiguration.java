@@ -21,7 +21,7 @@ public class FilterConfiguration {
         registrationBean.setFilter(new IpThrottlingFilter(proxyManager, bucketConfiguration));
         registrationBean.addUrlPatterns("/weather/summary");
         registrationBean.addUrlPatterns("/weather/cities/*");
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 100);
         return registrationBean;
     }
 }

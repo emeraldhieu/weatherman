@@ -1,0 +1,73 @@
+package com.emeraldhieu.app.ratelimit.api;
+
+import com.emeraldhieu.app.config.ForecastProperties;
+import com.emeraldhieu.app.forecast.ApiKeyIndexRotator;
+import com.emeraldhieu.app.forecast.ForecastClient;
+import com.emeraldhieu.app.forecast.Unit;
+import com.emeraldhieu.app.forecast.entity.Forecast;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.BucketConfiguration;
+import io.github.bucket4j.ConsumptionProbe;
+import io.github.bucket4j.distributed.proxy.ProxyManager;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.cache.Cache;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class ApiRateLimitAspect {
+
+    private final Cache cache;
+    private final ApiKeyIndexRotator apiKeyIndexRotator;
+    private final ProxyManager apiProxyManager;
+    private final BucketConfiguration apiBucketConfiguration;
+    private final ApiRateLimitProperties apiRateLimitProperties;
+    private final String API_KEY_INDEX = "apiKeyIndex";
+    private final MessageSource messageSource;
+
+    @Around("@annotation(ApiRateLimit)")
+    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        Bucket bucket = getBucket();
+
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+
+        /**
+         * Check if API rate limit is exceeded.
+         */
+        if (probe.isConsumed()) { // Rate limit is not exceeded
+
+            if (cache.get(API_KEY_INDEX) == null) {
+                cache.put(API_KEY_INDEX, 0);
+            }
+
+            return joinPoint.proceed();
+
+        } else { // Rate limit is exceeded. Rotate the API key index.
+            int nextApiKeyIndex = apiKeyIndexRotator.rotateIndex();
+
+            log.info("{} has been reached. Switch API key index to {}.",
+                messageSource.getMessage("rateLimitOneMillionCallsPerMonth", null, null),
+                nextApiKeyIndex);
+
+            Object object = joinPoint.proceed();
+
+            // Refill the bucket for new rate limit.
+            bucket.reset();
+
+            return object;
+        }
+    }
+
+    private Bucket getBucket() {
+        String cacheKey = apiRateLimitProperties.getCacheKey();
+        return apiProxyManager.builder()
+            .build(cacheKey, apiBucketConfiguration);
+    }
+}

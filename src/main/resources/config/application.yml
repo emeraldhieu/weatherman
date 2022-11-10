@@ -1,6 +1,15 @@
 spring:
   jackson:
     default-property-inclusion: non_null
+  messages:
+    basename: i18n/messages
+  mvc:
+    # Throw NoHandlerFoundException
+    # See https://stackoverflow.com/questions/36733254/spring-boot-rest-how-to-configure-404-resource-not-found#36734193
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
 
 feign:
   client:
@@ -14,6 +23,13 @@ logging:
   level:
     # See https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/#feign-logging
     com.emeraldhieu.app.forecast.ForecastClient: DEBUG
+
+server:
+  error:
+    include-message: always
+    # Hide stack traces because spring-boot-dev-tools sets it automatically
+    # See https://stackoverflow.com/questions/54827407/remove-trace-field-from-responsestatusexception#56546039
+    include-stacktrace: never
 
 application:
   forecast:

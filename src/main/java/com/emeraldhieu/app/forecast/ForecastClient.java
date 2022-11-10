@@ -1,5 +1,6 @@
 package com.emeraldhieu.app.forecast;
 
+import com.emeraldhieu.app.forecast.config.ForecastFeignConfiguration;
 import com.emeraldhieu.app.forecast.entity.Forecast;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

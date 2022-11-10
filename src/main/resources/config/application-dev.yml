@@ -1,0 +1,11 @@
+application:
+  api-rate-limit:
+    cacheKey: apiRateLimit
+    requestCount: 900000 # ~1,000,000 requests
+    durationInSeconds: 2630000 # per month
+    expirationInSeconds: 2630000 # the bucket expires in 1 month
+  ip-rate-limit:
+    namespace: ipRateLimit
+    requestCount: 2 # only 2 requests allowed
+    durationInSeconds: 1 # during 1 second
+    expirationInSeconds: 60 # the bucket expires in 60 seconds

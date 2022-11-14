@@ -14,6 +14,10 @@ import org.springframework.cache.Cache;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+/**
+ * An aspect that checks API rate limiting using bucket4j.
+ * See https://github.com/bucket4j/bucket4j
+ */
 @Aspect
 @Component
 @RequiredArgsConstructor

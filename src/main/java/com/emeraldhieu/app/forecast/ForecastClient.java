@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * The second way of using Open Feign without Spring.
+ * Feign client that serves Open Weather API.
  */
 @FeignClient(value = "forecast", url = "https://api.openweathermap.org",
     configuration = ForecastFeignConfiguration.class

@@ -34,9 +34,10 @@ server:
 application:
   forecast:
     # Configure API keys of multiple accounts here.
+    # TODO Store this sensitive information in Spring Cloud Config
     apiKeys:
-      - f598bbd03d2cd734a2c070aacf260467
-      - f598bbd03d2cd734a2c070aacf260467
+      - f598bbd03d2cd734a2c070aacf260467 # API key of account #1
+      - f598bbd03d2cd734a2c070aacf260467 # API key of account #2
     retry:
       maxAttempts: 2
       maxDelay: 500

@@ -15,7 +15,8 @@ import java.util.stream.IntStream;
 
 /**
  * A repository that wraps {@link RetryableForecastClient} to support caching.
- * If @Cacheable was applied on feign client, we wouldn't be able to mock feign's data and have the response cached.
+ * NOTE that @Cacheable can't be used on {@link ForecastClient}.
+ * If @Cacheable was used on {@link ForecastClient}, we wouldn't be able to mock feign's data and have the response cached.
  * See https://stackoverflow.com/questions/69282312/why-does-cachable-work-with-bean-return-mock-but-not-with-mockedbean#69284729
  */
 @Repository

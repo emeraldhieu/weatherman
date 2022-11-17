@@ -10,12 +10,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
-import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -67,12 +65,5 @@ public class RedisConfiguration {
         long maxIdleTimeInMilliseconds = Duration.ofMinutes(forecastProperties.getMaxIdleTimeInMinutes()).toMillis();
         config.put(forecastProperties.getCacheName(), new CacheConfig(timeToLiveInMilliseconds, maxIdleTimeInMilliseconds));
         return config;
-    }
-
-    @Bean
-    public KeyGenerator keyGenerator() {
-        return (target, method, params) ->
-            method.getName() + "_" +
-                StringUtils.arrayToDelimitedString(params, "_");
     }
 }

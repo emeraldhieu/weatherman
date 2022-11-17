@@ -50,4 +50,29 @@ class ForecastTimeFormatterTest {
         assertEquals(expectedDateStr, dateStr);
     }
 
+    @Test
+    public void givenDateTimeWithZeroPaddingDate_whenFormat_thenReturnDateTimeStr() {
+        // GIVEN
+        LocalDateTime dateTime = LocalDateTime.of(2022, 11, 5, 0, 0, 0);
+        String expectedDateTimeStr = "2022-11-05 00:00:00";
+
+        // WHEN
+        String dateTimeStr = forecastTimeFormatter.format(dateTime);
+
+        // THEN
+        assertEquals(expectedDateTimeStr, dateTimeStr);
+    }
+
+    @Test
+    public void givenDateTimeWithoutZeroPaddingDate_whenFormat_thenReturnDateTimeStr() {
+        // GIVEN
+        LocalDateTime dateTime = LocalDateTime.of(2022, 11, 11, 0, 0, 0);
+        String expectedDateTimeStr = "2022-11-11 00:00:00";
+
+        // WHEN
+        String dateTimeStr = forecastTimeFormatter.format(dateTime);
+
+        // THEN
+        assertEquals(expectedDateTimeStr, dateTimeStr);
+    }
 }

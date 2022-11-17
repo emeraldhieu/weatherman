@@ -55,8 +55,7 @@ public class ForecastRepository {
 
     private void putCache(String cityId, List<DayForecast> dayForecasts) {
         dayForecasts.forEach(dayForecast -> {
-            String cacheKey = String.format("%s_%s_%s",
-                forecastProperties.getCacheKeyPrefix(), cityId, dayForecast.getDate());
+            String cacheKey = getCacheKey(cityId, dayForecast.getDate());
             if (cache.get(cacheKey) == null) {
                 log.info(String.format("%s has been cached", cacheKey));
                 cache.put(cacheKey, dayForecast);

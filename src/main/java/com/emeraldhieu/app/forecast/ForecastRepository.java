@@ -66,7 +66,7 @@ public class ForecastRepository {
 
     List<DayForecast> getNextDayForecasts(String cityId) {
         int dayOffset = 1;
-        int daysToRetrieve = 4;
+        int daysToRetrieve = getDaysToRetrieve();
         LocalDate today = clock.getCurrentLocalDate();
         return IntStream.rangeClosed(dayOffset, daysToRetrieve)
             .mapToObj(theDayOffset -> {
@@ -75,5 +75,15 @@ public class ForecastRepository {
                 return getDayForecast(cityId, nextDayCacheKey, Unit.CELSIUS);
             })
             .collect(Collectors.toList());
+    }
+
+    private int getDaysToRetrieve() {
+        int hour = clock.getCurrentLocalDateTime().getHour();
+        /**
+         * If the time is midnight,
+         * Open Weather API will return 5 full days, each day has 8 timestamps.
+         * Otherwise, get only 4 full days.
+         */
+        return hour == 0 ? 5 : 4;
     }
 }

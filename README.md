@@ -8,7 +8,7 @@ A REST API that forecasts temperatures for cities using [Open Weather API](https
 
 To calculate accurate average temperature, weatherman skips the days that have the number of timestamps less than 8 and group the timestamps by day. For the best case, we have 5 days. For the worst case, we have 4 days.
 
-For example, if the forecast response contains "2022-11-05 21:00", "2022-11-06 00:00", "2022-11-06 03:00", "2022-11-06 06:00", "2022-11-06 09:00", "2022-11-06 12:00", "2022-11-06 15:00", "2022-11-06 18:00", "2022-11-06 21:00", "2022-11-07 00:00", only 8 timestamps of the "2022-11-06" will be kept, the rest will be ommitted.
+For example, if the forecast response contains "2022-11-05 21:00", "2022-11-06 00:00", "2022-11-06 03:00", "2022-11-06 06:00", "2022-11-06 09:00", "2022-11-06 12:00", "2022-11-06 15:00", "2022-11-06 18:00", "2022-11-06 21:00", "2022-11-07 00:00", only 8 timestamps of the "2022-11-06" will be kept, the rest will be omitted.
 
 ## Free Plan Rate Limiting
 
@@ -18,7 +18,7 @@ Open Weather API restricts [1,000,000 calls per month and 60 calls per minute](h
 
 #### 1) Cache daily forecast by city
 
-Weatherman breaks down the response of [5-day-3-hour Forecast API](https://openweathermap.org/forecast5) into daily forecasts and cache them into Redis. This way the forecast caches can be retrieved if the next requests ask for the same city in any day of the same next 5 days. Caching helps reducing calls to Open Weather API.
+Weatherman breaks down the response of [5-day-3-hour Forecast API](https://openweathermap.org/forecast5) into daily forecasts and cache them into Redis. This way the forecast caches can be retrieved if the next requests ask for the same city in any day of the same five days. This caching helps reduce calls to Open Weather API at the expense of less accurate forecast.
 
 #### 2) Rotate API keys
 
@@ -168,3 +168,7 @@ docker compose up -d
 In IntelliJ, start `WeathermanApp`.
 
 Optionally, you can pass `spring.profiles.active=dev` to use the real use-case rate limiting.
+
+## Resources
+
+Data of cities can be found at [Bulk Download](http://bulk.openweathermap.org/sample/).
